@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+option csharp_namespace = "GameClient";
+
+package greet;
+
+
+service Greeter {
+  //авторизация
+  rpc Login (LoginRequest) returns (LoginReply);
+  //проверка баланса
+  rpc GetBalance (BalanceRequest) returns (BalanceReplay);
+  //просмотр доступных игр
+  rpc GetGames (GetGamesRequest) returns (GetGamesReplay);
+  //подключение к игре по id
+  rpc ConnectToGame (ConnectToGameRequest) returns (ConnectToGameReplay);
+}
+
+message LoginRequest {
+  string name = 1;
+  string password = 2;
+}
+
+message LoginReply {
+  bool is_login = 1;
+}
+
+message BalanceRequest {
+  string name = 1;
+}
+
+message BalanceReplay {
+  int32 money = 1;
+}
+
+message GetGamesRequest {
+  
+}
+
+message GetGamesReplay {
+  string games_list = 1;
+}
+
+message ConnectToGameRequest {
+  int32 id_game = 1;
+}
+
+message ConnectToGameReplay {
+  bool success = 1;
+}
