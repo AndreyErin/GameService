@@ -14,6 +14,10 @@ service Greeter {
   rpc GetGames (GetGamesRequest) returns (GetGamesReplay);
   //подключение к игре по id
   rpc ConnectToGame (ConnectToGameRequest) returns (ConnectToGameReplay);
+  //ожидание начала игры
+  rpc WaitiningStartGame (WaitiningStartGameRequest) returns (WaitiningStartGameReplay);
+  //ожидание результата боя
+  rpc GetResultBattle (ResultBattleRequest) returns (ResultBattleReplay);
 }
 
 message LoginRequest {
@@ -33,9 +37,7 @@ message BalanceReplay {
   int32 money = 1;
 }
 
-message GetGamesRequest {
-  
-}
+message GetGamesRequest { }
 
 message GetGamesReplay {
   string games_list = 1;
@@ -43,8 +45,27 @@ message GetGamesReplay {
 
 message ConnectToGameRequest {
   int32 id_game = 1;
+  int32 id_player = 2;
 }
 
 message ConnectToGameReplay {
-  bool success = 1;
+  int32 count_players = 1;
+}
+
+message WaitiningStartGameRequest {
+  int32 id_game = 1;
+}
+
+message WaitiningStartGameReplay {
+  bool start = 1;
+}
+
+message ResultBattleRequest {
+  int32 id_game = 1;
+  int32 id_player = 2;
+  string key = 3;
+}
+
+message ResultBattleReplay {
+  int32 winner = 1;
 }

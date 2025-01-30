@@ -4,8 +4,6 @@ namespace GameClient
 {
     internal class Program
     {
-        static string _name = "";
-
         static async Task Main(string[] args)
         {
             Console.WriteLine("Добро пожаловать в игру Камень-Ножницы-Бумага");
@@ -16,7 +14,7 @@ namespace GameClient
             //авторизация
             await serverManager.Authorize();
             //выводим меню
-            Console.WriteLine(@"Меню: \b - баланс, \g - доступные матчи, \c [номер-комнаты] - присоединиться к матчу, \v - закрыть приложение");
+            Console.WriteLine(@"Меню: \b - баланс, \g - доступные матчи, \c - присоединиться к матчу, \v - закрыть приложение");
             
             //взаимодействие с пользователем
             while (true)
@@ -39,19 +37,12 @@ namespace GameClient
                         Console.WriteLine($"Ваш баланс: {balance}руб.");
                         break;
                     case "g":
-                        List<Instance> instances = await serverManager.GetGamesAsync();
-                        foreach (var item in instances)
-                        {
-                            int countPlayers = 0;
-                            if (item.FirstPlayerId != null)
-                            {
-                                countPlayers = 1;
-                            }
-                            
-                            Console.WriteLine($"Комната №{item.Id}, ставка: {item.Bet}руб. игроков: {countPlayers}");
-                        }                       
+                        await GetGameList(serverManager);
                         break;
                     case "c":
+                        await serverManager.GoToGameAsync();
+                        //выводим меню
+                        Console.WriteLine(@"Меню: \b - баланс, \g - доступные матчи, \c - присоединиться к матчу, \v - закрыть приложение");
                         break;
                     case "v":
                         //выход
@@ -61,6 +52,27 @@ namespace GameClient
                         Console.WriteLine("Неверная команда");
                         break;
                 }
+            }
+        }
+
+        private static async Task GetGameList(ComToServerManager serverManager)
+        {
+            List<Instance> instances = await serverManager.GetGamesAsync();
+            if (instances.Count == 0) 
+            {
+                Console.WriteLine("Нет доступных комнат.");
+                return;
+            }
+
+            foreach (var item in instances)
+            {
+                int countPlayers = 0;
+                if (item.FirstPlayerId != 0)
+                {
+                    countPlayers = 1;
+                }
+
+                Console.WriteLine($"Комната №{item.Id}, ставка: {item.Bet}руб. игроков: {countPlayers}");
             }
         }
     }

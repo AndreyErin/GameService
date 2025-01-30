@@ -54,9 +54,83 @@ namespace GameService.Services
 
         public override Task<GetGamesReplay> GetGames(GetGamesRequest request, ServerCallContext context)
         {
-            string jsonString = JsonSerializer.Serialize(_instances.instances);
+            var subInst = _instances.instances.Where(x=>x.IsVisible == true);
+
+            string jsonString = JsonSerializer.Serialize(subInst);
 
             return Task.FromResult(new GetGamesReplay() { GamesList = jsonString});
+        }
+
+        public override Task<ConnectToGameReplay> ConnectToGame(ConnectToGameRequest request, ServerCallContext context)
+        {
+            //если такой комнаты нет или все слоты заняты
+            var room = _instances.instances.FirstOrDefault(x=>x.Id == request.IdGame && x.IsVisible == true);
+            if (room == null)
+            {
+                return Task.FromResult(new ConnectToGameReplay() { CountPlayers = -1 });
+            }
+
+            bool connect = room.AddPlayer(request.IdPlayer);
+            if (connect) 
+            {
+                int countPlrs = room.SecondPlayerId == 0 ? 1 : 2;
+                return Task.FromResult(new ConnectToGameReplay() { CountPlayers = countPlrs });
+            }
+            else
+            {
+                return Task.FromResult(new ConnectToGameReplay() { CountPlayers = -1 });
+            }           
+        }
+
+        public override Task<WaitiningStartGameReplay> WaitiningStartGame(WaitiningStartGameRequest request, ServerCallContext context)
+        {
+            var room = _instances.instances.FirstOrDefault(x => x.Id == request.IdGame);
+            //если что-то пошло не так
+            if (room == null)
+            {
+                return Task.FromResult(new WaitiningStartGameReplay() { Start = false });
+            }
+
+            bool wait = true;
+            //если оба игрока подключились к игре
+            while (wait) 
+            {
+                Thread.Sleep(1000);
+                
+                if (room?.IsVisible == false)
+                {
+                    wait = false;
+                }
+            }
+
+            return Task.FromResult(new WaitiningStartGameReplay() { Start = true });          
+        }
+
+
+        public override Task<ResultBattleReplay> GetResultBattle(ResultBattleRequest request, ServerCallContext context)
+        {
+            var room = _instances.instances.FirstOrDefault(x => x.Id == request.IdGame);
+            //если что-то пошло не так
+            if (room == null)
+            {
+                return Task.FromResult(new ResultBattleReplay() { Winner = 0 });
+            }
+            //делаем ход
+            room.Battle(request.IdPlayer, request.Key);
+
+            bool wait = true;
+            //ждем результата
+            while (wait)
+            {
+                Thread.Sleep(1000);
+
+                if (room?.Winner != 0)
+                {
+                    wait = false;
+                }
+            }
+
+            return Task.FromResult(new ResultBattleReplay() { Winner = room.Winner });
         }
     }
 }
