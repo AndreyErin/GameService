@@ -23,21 +23,27 @@ namespace GameService.Services
             //находим пользователя
             User? user = _users.Get(request.Name);
 
-            string password = "0000";
-            //тут идет проверка существования пользователя, пароля и защита от повторного входа)
-            if (user != null && request.Password == password && (usersOnline.FirstOrDefault(x=>x.Id == user?.Id) == null))
+            //защита от повторного входа
+            if (usersOnline.FirstOrDefault(x => x.Id == user?.Id) != null) 
             {
-                usersOnline.Add(user);
-                return Task.FromResult(new LoginReply { IsLogin = true });
+                return Task.FromResult(new LoginReply { Id = -2 });
             }
 
-            //вход не удался
-            return Task.FromResult(new LoginReply { IsLogin = false });
+            string password = "0000";
+            //тут идет проверка существования пользователя, пароля)
+            if (user != null && request.Password == password)
+            {
+                usersOnline.Add(user);
+                return Task.FromResult(new LoginReply { Id = user.Id });
+            }
+
+            //неверный логин/пароль
+            return Task.FromResult(new LoginReply { Id = -1 });
         }
 
         public override Task<BalanceReplay> GetBalance(BalanceRequest request, ServerCallContext context)
         {
-            User? user = _users.Get(request.Name);
+            User? user = _users.Get(request.Id);
             if(user != null) 
             { 
                 int money = user.Money;

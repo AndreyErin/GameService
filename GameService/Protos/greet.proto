@@ -22,11 +22,11 @@ message LoginRequest {
 }
 
 message LoginReply {
-  bool is_login = 1;
+  int32 id = 1;
 }
 
 message BalanceRequest {
-  string name = 1;
+  int32 id = 1;
 }
 
 message BalanceReplay {
