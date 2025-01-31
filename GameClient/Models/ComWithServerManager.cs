@@ -3,28 +3,23 @@ using System.Text.Json;
 
 namespace GameClient.Models
 {
-    public class ComToServerManager
+    public class ComWithServerManager
     {
         private int _id;
+        private GrpcChannel _channel;
         private Greeter.GreeterClient _client;
-        private IAuthService _authService;
 
-        public ComToServerManager(string url, IAuthService authService) 
+        public ComWithServerManager(string url, int userId) 
         {
-            _authService = authService;
+            _id = userId;
 
             //канал для обмена сообщениями
-            var channel = GrpcChannel.ForAddress(url);
+            _channel = GrpcChannel.ForAddress(url);
             //клиент
-            _client = new Greeter.GreeterClient(channel);           
+            _client = new Greeter.GreeterClient(_channel);           
         }
 
-        public async Task Authorize()
-        {
-            _id = await _authService.AuthorizeAsync(_client);
-        }
-
-        public async Task<int> GetBalanceAsync()
+        public async Task<string> GetBalanceAsync()
         {
             var result = await _client.GetBalanceAsync(new BalanceRequest() { Id = _id });
             return result.Money;
@@ -59,39 +54,14 @@ namespace GameClient.Models
                     case 1:
                         Console.WriteLine("Вы присоединились к матчу. Ждем второго игрока!");
                         var start = await _client.WaitiningStartGameAsync(new WaitiningStartGameRequest() { IdGame = numberRoom});
-                        Console.WriteLine("Все в сборе. Делайте свой ход!");
-                        int battle = await Battle(numberRoom);
-                        if (battle == _id)
-                        {
-                            Console.WriteLine("Победа!");
-                        }
-                        else if(battle == -1)
-                        {
-                            Console.WriteLine("Ничья.");
-                        }
-                        else
-                        {
-                            Console.WriteLine("Поражение((");
-                        }
-
+                        
+                        int winerId = await Battle(numberRoom);
+                        Console.WriteLine(ShowBattleResult(winerId));
                         return;
                     //начинаем игру сразу
                     case 2:
-                        Console.WriteLine("Все в сборе. Делайте свой ход!");
-                        int battle1 = await Battle(numberRoom);
-                        if (battle1 == _id)
-                        {
-                            Console.WriteLine("Победа!");
-                        }
-                        else if (battle1 == -1)
-                        {
-                            Console.WriteLine("Ничья.");
-                        }
-                        else
-                        {
-                            Console.WriteLine("Поражение((");
-                        }
-
+                        int winerId2 = await Battle(numberRoom);
+                        Console.WriteLine(ShowBattleResult(winerId2));
                         return;
                     default:
                         await FailConnectToGame();
@@ -139,15 +109,41 @@ namespace GameClient.Models
 
         private async Task<int> Battle(int room)
         {
+            Console.WriteLine("Все в сборе. Делайте свой ход!");
+
             string key = Console.ReadLine().ToUpper();
-            while (key != "K" && key != "N" && key != "B") 
+            while (key != "К" && key != "Н" && key != "Б") 
             {
+                Console.WriteLine("Неверная команда. Введите К, Н или Б");
                 key = Console.ReadLine();
             }
-            Console.WriteLine("Ваш ход :" + key);
+            Console.WriteLine($"Ваш ход :{key}. Ожидание хода соперника."  );
 
             var result = await _client.GetResultBattleAsync(new ResultBattleRequest() { IdGame = room, IdPlayer = _id, Key = key });
             return result.Winner;
+        }
+
+        private string ShowBattleResult(int winnerId)
+        {
+            string result = "";
+            if (winnerId == _id)
+            {
+                result = "Победа!";
+            }
+            else if (winnerId == -1)
+            {
+                result = "Ничья.";
+            }
+            else
+            {
+                result = "Поражение((";
+            }
+
+            return result;
+        }
+        public void Dispose()
+        {
+            _channel.Dispose();
         }
     }
 }

@@ -1,8 +1,8 @@
-﻿
-namespace GameClient.Models
+﻿namespace GameClient.Models
 {
     public interface IAuthService
     {
-        Task<int> AuthorizeAsync(Greeter.GreeterClient client);
+        Task<int> LoginAsync();
+        Task<int> LogoutAsync();
     }
 }

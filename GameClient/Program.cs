@@ -8,32 +8,32 @@ namespace GameClient
         {
             Console.WriteLine("Добро пожаловать в игру Камень-Ножницы-Бумага");
 
-            AuthService authService = new AuthService();
-            ComToServerManager serverManager = new("https://localhost:7089", authService);
+            //вход в систему, получение id
+            AuthService authService = new AuthService("https://localhost:7089");
+            int userId = await authService.LoginAsync();
+            //взаимодействие с сервером
+            ComWithServerManager serverManager = new("https://localhost:7089", userId);
 
-            //авторизация
-            await serverManager.Authorize();
             //выводим меню
             Console.WriteLine(@"Меню: \b - баланс, \g - доступные матчи, \c - присоединиться к матчу, \v - закрыть приложение");
             
             //взаимодействие с пользователем
             while (true)
             {
+                //валидация входных данных
                 string inputLine = Console.ReadLine();
-
                 string slash = inputLine.Substring(0,1);
-
                 if (slash != @"\")
                 {
                     Console.WriteLine("Неверная команда");
                     continue;
                 }
-
                 string command = inputLine.Substring(1, 1);
+
                 switch (command) 
                 { 
                     case "b":
-                        int balance = await serverManager.GetBalanceAsync();
+                        string balance = await serverManager.GetBalanceAsync();
                         Console.WriteLine($"Ваш баланс: {balance}руб.");
                         break;
                     case "g":
@@ -46,6 +46,8 @@ namespace GameClient
                         break;
                     case "v":
                         //выход
+                        serverManager.Dispose();
+                        await authService.LogoutAsync();
                         return;
                         
                     default:
@@ -55,7 +57,7 @@ namespace GameClient
             }
         }
 
-        private static async Task GetGameList(ComToServerManager serverManager)
+        private static async Task GetGameList(ComWithServerManager serverManager)
         {
             List<Instance> instances = await serverManager.GetGamesAsync();
             if (instances.Count == 0) 

@@ -1,5 +1,5 @@
 ﻿
-namespace GameService.Models.User
+namespace GameService.Models.UserData
 {
     public class FakeUserRepository : IUserRepository
     {

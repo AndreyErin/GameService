@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+option csharp_namespace = "GameService";
+
+package greet;
+
+
+service Greeter {
+  //вход
+  rpc Login (LoginRequest) returns (LoginReply);
+  //выход
+  rpc Logout (LogoutRequest) returns (LogoutReply);
+  //проверка баланса
+  rpc GetBalance (BalanceRequest) returns (BalanceReply);
+  //просмотр доступных игр
+  rpc GetGames (GetGamesRequest) returns (GetGamesReply);
+  //подключение к игре по id
+  rpc ConnectToGame (ConnectToGameRequest) returns (ConnectToGameReply);
+  //ожидание начала игры
+  rpc WaitiningStartGame (WaitiningStartGameRequest) returns (WaitiningStartGameReply);
+  //ожидание результата боя
+  rpc GetResultBattle (ResultBattleRequest) returns (ResultBattleReply);
+}
+
+message LoginRequest {
+  string name = 1;
+  string password = 2;
+}
+
+message LoginReply {
+  int32 id = 1;
+}
+
+message LogoutRequest {
+  int32 id = 1;
+}
+
+message LogoutReply { }
+
+message BalanceRequest {
+  int32 id = 1;
+}
+
+message BalanceReply {
+  string money = 1;
+}
+
+message GetGamesRequest { }
+
+message GetGamesReply {
+  string games_list = 1;
+}
+
+message ConnectToGameRequest {
+  int32 id_game = 1;
+  int32 id_player = 2;
+}
+
+message ConnectToGameReply {
+  int32 count_players = 1;
+}
+
+message WaitiningStartGameRequest {
+  int32 id_game = 1;
+}
+
+message WaitiningStartGameReply {
+  bool start = 1;
+}
+
+message ResultBattleRequest {
+  int32 id_game = 1;
+  int32 id_player = 2;
+  string key = 3;
+}
+
+message ResultBattleReply {
+  int32 winner = 1;
+}

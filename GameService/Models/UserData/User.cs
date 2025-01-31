@@ -1,9 +1,9 @@
-﻿namespace GameService.Models.User
+﻿namespace GameService.Models.UserData
 {
     public class User
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public int Money { get; set; }
+        public decimal Money { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace GameService.Models.User
+﻿namespace GameService.Models.UserData
 {
     public interface IUserRepository
     {

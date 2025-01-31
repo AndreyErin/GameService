@@ -1,6 +1,6 @@
 using GameService.Models.Inst;
-using GameService.Models.User;
-using GameService.Services;
+using GameService.Models.Services;
+using GameService.Models.UserData;
 
 
 namespace GameService

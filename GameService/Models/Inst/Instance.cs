@@ -17,9 +17,11 @@
 
             Id = _newId;
         }
+       
         public int Id { get; set; }
-        public int Bet { get; set; }
+        public decimal Bet { get; set; }
         public int FirstPlayerId { get; set; }
+       
         public int SecondPlayerId { get; set; }
         public bool IsVisible { get; set; } = true;
 
@@ -61,46 +63,46 @@
             {
                 switch (_firstPlayerMove)
                 {
-                    case "K":
+                    case "К":
                         switch (_secondPlayerMove)
                         {
-                            case "K":
+                            case "К":
                                 //нечья
                                 Winner = -1;
                                 break;
-                            case "N":
+                            case "Н":
                                 Winner = FirstPlayerId;
                                 break;
-                            case "B":
+                            case "Б":
                                 Winner = SecondPlayerId;
                                 break;
                         }
                         break;
-                    case "N":
+                    case "Н":
                         switch (_secondPlayerMove)
                         {
-                            case "K":
+                            case "К":
                                 Winner = SecondPlayerId;
                                 break;
-                            case "N":
+                            case "Н":
                                 //нечья
                                 Winner = -1;
                                 break;
-                            case "B":
+                            case "Б":
                                 Winner = FirstPlayerId;
                                 break;
                         }
                         break;
-                    case "B":
+                    case "Б":
                         switch (_secondPlayerMove)
                         {
-                            case "K":
+                            case "К":
                                 Winner = FirstPlayerId;
                                 break;
-                            case "N":
+                            case "Н":
                                 Winner = SecondPlayerId;
                                 break;
-                            case "B":
+                            case "Б":
                                 //нечья
                                 Winner = -1;
                                 break;
