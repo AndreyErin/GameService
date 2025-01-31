@@ -7,10 +7,10 @@ namespace GameClient
         static async Task Main(string[] args)
         {
             Console.WriteLine("Добро пожаловать в игру Камень-Ножницы-Бумага");
-
             //вход в систему, получение id
             AuthService authService = new AuthService("https://localhost:7089");
             int userId = await authService.LoginAsync();
+
             //взаимодействие с сервером
             ComWithServerManager serverManager = new("https://localhost:7089", userId);
 

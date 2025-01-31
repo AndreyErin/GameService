@@ -1,6 +1,8 @@
+using GameService.Models.Db;
+using GameService.Models.Db.UserData;
 using GameService.Models.Inst;
 using GameService.Models.Services;
-using GameService.Models.UserData;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace GameService
@@ -12,16 +14,17 @@ namespace GameService
             var builder = WebApplication.CreateBuilder(args);
             builder.Services.AddControllers();
             builder.Services.AddSingleton<InstancesService>();
-            builder.Services.AddScoped<FakeUserRepository>();
 
+            //ад
+            string connection = builder.Configuration.GetConnectionString("Default");
+            builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connection));
 
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
 
-            // Add services to the container.
             builder.Services.AddGrpc();
 
             var app = builder.Build();
-            
-            
+                    
             app.MapDefaultControllerRoute();
             // Configure the HTTP request pipeline.
             app.MapGrpcService<GreeterService>();

@@ -48,25 +48,22 @@ namespace GameClient.Models
 
                 var result = await _client.ConnectToGameAsync(new ConnectToGameRequest() { IdGame = numberRoom, IdPlayer = _id });
 
-                switch (result.CountPlayers)
+                if (result.CountPlayers > 2 || result.CountPlayers < 1)
                 {
-                    //ждем второго игрока
-                    case 1:
-                        Console.WriteLine("Вы присоединились к матчу. Ждем второго игрока!");
-                        var start = await _client.WaitiningStartGameAsync(new WaitiningStartGameRequest() { IdGame = numberRoom});
-                        
-                        int winerId = await Battle(numberRoom);
-                        Console.WriteLine(ShowBattleResult(winerId));
-                        return;
-                    //начинаем игру сразу
-                    case 2:
-                        int winerId2 = await Battle(numberRoom);
-                        Console.WriteLine(ShowBattleResult(winerId2));
-                        return;
-                    default:
-                        await FailConnectToGame();
-                        break;
+                    await FailConnectToGame();
+                    continue;
                 }
+
+                if (result.CountPlayers == 1)
+                {
+                    Console.WriteLine("Вы присоединились к матчу. Ждем второго игрока!");
+                    var start = await _client.WaitiningStartGameAsync(new WaitiningStartGameRequest() { IdGame = numberRoom });
+                }
+
+                int winerId2 = await Battle(numberRoom);
+                Console.WriteLine(ShowBattleResult(winerId2));
+                Console.WriteLine("----------");
+                return;
             }
         }
 

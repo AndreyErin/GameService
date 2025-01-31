@@ -1,5 +1,5 @@
+using GameService.Models.Db.UserData;
 using GameService.Models.Inst;
-using GameService.Models.UserData;
 using Grpc.Core;
 using System.Text.Json;
 
@@ -9,11 +9,11 @@ namespace GameService.Models.Services
     {
         private static List<User> usersOnline = new List<User>();
 
-        private FakeUserRepository _users;
+        private IUserRepository _users;
         private InstancesService _instances;
-        public GreeterService(FakeUserRepository fakeUserRepository, InstancesService instancesService)
+        public GreeterService(IUserRepository userRepository, InstancesService instancesService)
         {
-            _users = fakeUserRepository;
+            _users = userRepository;
             _instances = instancesService;
         }
 
@@ -23,7 +23,7 @@ namespace GameService.Models.Services
             User? user = _users.Get(request.Name);
 
             //защита от повторного входа
-            if (usersOnline.FirstOrDefault(x => x.Id == user?.Id) != null)
+            if (usersOnline.FirstOrDefault(x => x.id == user?.id) != null)
             {
                 return Task.FromResult(new LoginReply { Id = -2 });
             }
@@ -33,7 +33,7 @@ namespace GameService.Models.Services
             if (user != null && request.Password == password)
             {
                 usersOnline.Add(user);
-                return Task.FromResult(new LoginReply { Id = user.Id });
+                return Task.FromResult(new LoginReply { Id = user.id });
             }
 
             //неверный логин/пароль
@@ -45,7 +45,7 @@ namespace GameService.Models.Services
             User? user = _users.Get(request.Id);
             if (user != null)
             {
-                string money = user.Money.ToString();
+                string money = user.balance.ToString();
                 return Task.FromResult(new BalanceReply() { Money = money });
             }
             return Task.FromResult(new BalanceReply() { Money = "-1" });
@@ -136,7 +136,7 @@ namespace GameService.Models.Services
         {
             int id = request.Id;
 
-            User? user = usersOnline.Find(x => x.Id == id);
+            User? user = usersOnline.Find(x => x.id == id);
 
             if (user != null)
             {

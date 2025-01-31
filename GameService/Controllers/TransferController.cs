@@ -1,4 +1,5 @@
-﻿using GameService.Models.Inst;
+﻿using GameService.Models.Db;
+using GameService.Models.Inst;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GameService.Controllers
@@ -8,16 +9,18 @@ namespace GameService.Controllers
     public class TransferController : Controller
     {
         private InstancesService _instancesService;
-        public TransferController(InstancesService instancesService)
+        private AppDbContext _db;
+        public TransferController(InstancesService instancesService, AppDbContext appDbContext)
         {
             _instancesService = instancesService;
+            _db = appDbContext;
         }
 
         [HttpGet]
         public string Index()
         {
             string a = _instancesService.instances[1].Id.ToString() + " " + _instancesService.instances[1].Bet.ToString() + " руб.";
-
+            a = _db.users.ToList().First().name.ToString();
             return a;
         }
     }
