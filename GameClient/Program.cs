@@ -20,16 +20,12 @@ namespace GameClient
             //взаимодействие с пользователем
             while (true)
             {
-                //валидация входных данных
-                string inputLine = Console.ReadLine();
-                string slash = inputLine.Substring(0,1);
-                if (slash != @"\")
+                string? command = GetCommand();
+                if (command == null) 
                 {
-                    Console.WriteLine("Неверная команда");
                     continue;
                 }
-                string command = inputLine.Substring(1, 1);
-
+              
                 switch (command) 
                 { 
                     case "b":
@@ -76,6 +72,30 @@ namespace GameClient
 
                 Console.WriteLine($"Комната №{item.Id}, ставка: {item.Bet}руб. игроков: {countPlayers}");
             }
+        }
+
+        private static string? GetCommand()
+        {
+            //валидация входных данных
+            string? inputLine = Console.ReadLine();
+            if (inputLine != null && inputLine.Length > 0)
+            {
+                string slash = inputLine?.Substring(0, 1);
+                if (slash != @"\")
+                {
+                    Console.WriteLine("Неверная команда");
+                    return null;
+                }
+            }
+            else
+            {
+                Console.WriteLine("Неверная команда");
+                return null;
+            }
+
+            string command = inputLine?.Substring(1, 1);
+
+            return command;
         }
     }
 }

@@ -53,7 +53,7 @@ namespace GameService.Models.Services
 
         public override Task<GetGamesReply> GetGames(GetGamesRequest request, ServerCallContext context)
         {
-            var subInst = _instances.instances.Where(x => x.IsVisible == true);
+            var subInst = _instances.GetFreeInsts();
 
             string jsonString = JsonSerializer.Serialize(subInst);
 
@@ -63,7 +63,7 @@ namespace GameService.Models.Services
         public override Task<ConnectToGameReply> ConnectToGame(ConnectToGameRequest request, ServerCallContext context)
         {
             //если такой комнаты нет или все слоты заняты
-            var room = _instances.instances.FirstOrDefault(x => x.Id == request.IdGame && x.IsVisible == true);
+            var room = _instances.GetFreeInsts().FirstOrDefault(x => x.Id == request.IdGame);
             if (room == null)
             {
                 return Task.FromResult(new ConnectToGameReply() { CountPlayers = -1 });
@@ -83,7 +83,7 @@ namespace GameService.Models.Services
 
         public override Task<WaitiningStartGameReply> WaitiningStartGame(WaitiningStartGameRequest request, ServerCallContext context)
         {
-            var room = _instances.instances.FirstOrDefault(x => x.Id == request.IdGame);
+            var room = _instances.Get(request.IdGame);
             //если что-то пошло не так
             if (room == null)
             {
@@ -107,7 +107,7 @@ namespace GameService.Models.Services
 
         public override async Task<ResultBattleReply> GetResultBattle(ResultBattleRequest request, ServerCallContext context)
         {
-            var room = _instances.instances.FirstOrDefault(x => x.Id == request.IdGame);
+            var room = _instances.Get(request.IdGame);
             //если что-то пошло не так
             if (room == null)
             {
@@ -129,7 +129,7 @@ namespace GameService.Models.Services
             }
 
             //убераем комнату из списка
-            _instances.instances.Remove(room);
+            _instances.Delete(room.Id);
 
             return new ResultBattleReply() { Winner = room.Winner };
         }
