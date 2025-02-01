@@ -1,9 +1,8 @@
 using GameService.Models.Db;
+using GameService.Models.Db.TransactionData;
 using GameService.Models.Db.UserData;
 using GameService.Models.Inst;
 using GameService.Models.Services;
-using Microsoft.EntityFrameworkCore;
-
 
 namespace GameService
 {
@@ -16,10 +15,10 @@ namespace GameService
             builder.Services.AddSingleton<InstancesService>();
 
             //ад
-            string connection = builder.Configuration.GetConnectionString("Default");
-            builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connection));
+            builder.Services.AddDbContext<AppDbContext>();
 
             builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<ITransactionsRepository, TransactionsRepository>();
 
             builder.Services.AddGrpc();
 

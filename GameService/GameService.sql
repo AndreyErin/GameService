@@ -9,7 +9,7 @@ create table users (
 );
 
 create table matchhistories (
-	matchnumber INTEGER NOT NULL PRIMARY KEY,
+	id BIGSERIAL NOT NULL PRIMARY KEY,
 	bet NUMERIC(19, 0) NOT NULL,
 	firstplayerid INTEGER NOT NULL,
 	secondplayerid INTEGER NOT NULL,
@@ -21,7 +21,7 @@ create table matchhistories (
 
 create table gametransactions (
 	id BIGSERIAL NOT NULL PRIMARY KEY,
-	matchnumber INTEGER NOT NULL REFERENCES matchhistories(matchnumber),
+	matchid INTEGER NULL,
 	senderplayerid INTEGER NOT NULL,
 	payeeplayerid INTEGER NOT NULL,
 	bet NUMERIC(19, 0) NOT NULL,
@@ -30,4 +30,4 @@ create table gametransactions (
 
 insert into users (name, balance) values ('Maks', 1111);
 insert into users (name, balance) values ('Kolia', 2222);
-insert into users (name, balance) values ('Misha', 1111);
+insert into users (name, balance) values ('Misha', 3333);

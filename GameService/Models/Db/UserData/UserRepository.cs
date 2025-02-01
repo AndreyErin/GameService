@@ -1,7 +1,4 @@
-﻿using GameService.Models.Db;
-
-
-namespace GameService.Models.Db.UserData
+﻿namespace GameService.Models.Db.UserData
 {
     public class UserRepository : IUserRepository
     {

@@ -1,11 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
-
+﻿
 namespace GameService.Models.Db
 {
     public class MatchHistory
     {
-        [Key]
-        public int matchnumber { get; set; }
+        public int id { get; set; }
         public decimal bet { get; set; }
         public int firstplayerid { get; set; }
         public int secondplayerid { get; set; }

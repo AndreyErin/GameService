@@ -105,14 +105,13 @@ namespace GameService.Models.Services
             return Task.FromResult(new WaitiningStartGameReply() { Start = true });
         }
 
-
-        public override Task<ResultBattleReply> GetResultBattle(ResultBattleRequest request, ServerCallContext context)
+        public override async Task<ResultBattleReply> GetResultBattle(ResultBattleRequest request, ServerCallContext context)
         {
             var room = _instances.instances.FirstOrDefault(x => x.Id == request.IdGame);
             //если что-то пошло не так
             if (room == null)
             {
-                return Task.FromResult(new ResultBattleReply() { Winner = 0 });
+                return new ResultBattleReply() { Winner = 0 };
             }
             //делаем ход
             room.Battle(request.IdPlayer, request.Key);
@@ -121,7 +120,7 @@ namespace GameService.Models.Services
             //ждем результата
             while (wait)
             {
-                Thread.Sleep(1000);
+                await Task.Delay(1000);
 
                 if (room?.Winner != 0)
                 {
@@ -129,7 +128,10 @@ namespace GameService.Models.Services
                 }
             }
 
-            return Task.FromResult(new ResultBattleReply() { Winner = room.Winner });
+            //убераем комнату из списка
+            _instances.instances.Remove(room);
+
+            return new ResultBattleReply() { Winner = room.Winner };
         }
 
         public override Task<LogoutReply> Logout(LogoutRequest request, ServerCallContext context)
