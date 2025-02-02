@@ -1,5 +1,4 @@
-﻿
-namespace GameService.Models.Db
+﻿namespace GameService.Models.Db.MatchHistoryData
 {
     public class MatchHistory
     {

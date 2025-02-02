@@ -1,4 +1,5 @@
-﻿using GameService.Models.Db.TransactionData;
+﻿using GameService.Models.Db.MatchHistoryData;
+using GameService.Models.Db.TransactionData;
 using GameService.Models.Db.UserData;
 using Microsoft.EntityFrameworkCore;
 

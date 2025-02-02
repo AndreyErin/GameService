@@ -2,6 +2,6 @@
 {
     public interface ITransactionsRepository
     {
-        int SetTransaction(int bet, int payeeid, int senderid);
+        int SetTransaction(decimal bet, int payeeid, int senderid, int? matchid = null);
     }
 }

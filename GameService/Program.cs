@@ -1,4 +1,5 @@
 using GameService.Models.Db;
+using GameService.Models.Db.MatchHistoryData;
 using GameService.Models.Db.TransactionData;
 using GameService.Models.Db.UserData;
 using GameService.Models.Inst;
@@ -12,13 +13,16 @@ namespace GameService
         {
             var builder = WebApplication.CreateBuilder(args);
             builder.Services.AddControllers();
-            builder.Services.AddSingleton<InstancesService>();
+
 
             //ад
             builder.Services.AddDbContext<AppDbContext>();
 
+            builder.Services.AddSingleton<InstancesService>();
+
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<ITransactionsRepository, TransactionsRepository>();
+            builder.Services.AddScoped<IMacthHistoryRepository, MacthHistoryRepository>();
 
             builder.Services.AddGrpc();
 

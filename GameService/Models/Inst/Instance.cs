@@ -1,16 +1,18 @@
-﻿using GameService.Models.Db;
+﻿using GameService.Models.Db.MatchHistoryData;
 using GameService.Models.Db.TransactionData;
-using GameService.Models.Db.UserData;
 
 namespace GameService.Models.Inst
 {
     //Экземляр матча
     public class Instance
     {
+
+        private IServiceScopeFactory _scopeFactory;
         //счетчик Id
         private static ushort _newId = 0;
-        public Instance(int bet)
-        {           
+        public Instance(int bet, IServiceScopeFactory scopeFactory)
+        {     
+            _scopeFactory = scopeFactory;
             Bet = bet;
 
             _newId++;
@@ -30,16 +32,7 @@ namespace GameService.Models.Inst
 
         private string _firstPlayerMove = "";
         private string _secondPlayerMove = "";
-
-        private int _winner;
-        public int Winner {
-            get { return _winner; }
-            set 
-            {
-                _winner = value;
-                Task.Run(SaveResult); 
-            }  
-        }
+        public int Winner {  get; set; }
 
         public bool AddPlayer(int idPlayer)
         {
@@ -71,7 +64,7 @@ namespace GameService.Models.Inst
                 _secondPlayerMove = move;
             }
 
-            if (_firstPlayerMove != null && _secondPlayerMove != null)
+            if (_firstPlayerMove != "" && _secondPlayerMove != "")
             {
                 switch (_firstPlayerMove)
                 {
@@ -121,82 +114,64 @@ namespace GameService.Models.Inst
                         }
                         break;
                 }
+
+
+                Task.Run(SaveResult);
             }            
         }
 
         private void SaveResult()
         {
-            var db = new AppDbContext();
-
-            MatchHistory matchHistory = new MatchHistory() 
-            {  
-                bet = Bet, 
-                firstplayerid = FirstPlayerId, 
+            MatchHistory matchHistory = new MatchHistory()
+            {
+                bet = Bet,
+                firstplayerid = FirstPlayerId,
                 secondplayerid = SecondPlayerId,
                 firstplayerkey = _firstPlayerMove,
                 secondplayerkey = _secondPlayerMove,
                 datematch = DateTime.UtcNow,
-                winner = Winner != -1? Winner : null,
+                winner = Winner != -1 ? Winner : null,
             };
-            db.matchhistories.Add(matchHistory);
-            db.SaveChanges();
-          
+
+            using (var scope = _scopeFactory.CreateScope())
+            {
+                var mhRepository = scope.ServiceProvider.GetService<IMacthHistoryRepository>();
+
+                mhRepository?.Add(matchHistory);
+            }
+
             //если есть победитель, то проводим транзакцию
             if (Winner != -1) 
             {
                 int matchId = matchHistory.id;
-                SetTransaction(db, matchId);
-            }
-            else
-            {
-                db.Dispose();
+                SetTransaction(matchId);
             }
         }
 
-        private void SetTransaction(AppDbContext db, int matchId) 
+        private async void SetTransaction(int matchId) 
         {
             //тот, кто платит
             int senderPlayerId = FirstPlayerId == Winner ? SecondPlayerId : FirstPlayerId;
-            bool transactionSuccess = true;
 
-            using (var transaction = db.Database.BeginTransaction())
+            using (var scope = _scopeFactory.CreateScope())
             {
-                try
+                var tRepository = scope.ServiceProvider.GetService<ITransactionsRepository>();
+                if (tRepository != null) 
                 {
-                    User user = db.users.First(x => x.id == senderPlayerId);
-                    user.balance -= Bet;
-                    db.SaveChanges();
+                    //3 попытки провести транзакцию
+                    for (int i = 0; i < 3; i++)
+                    {
+                        int tResult = tRepository.SetTransaction(Bet, Winner, senderPlayerId, matchId);
 
-                    User userWin = db.users.First(x => x.id == Winner);
-                    userWin.balance += Bet;
-                    db.SaveChanges();
+                        if (tResult == 1)
+                        {
+                            return;
+                        }
 
-                    transaction.Commit();
+                        await Task.Delay(1000);
+                    }
                 }
-                catch (Exception)
-                {
-                    //отменяем
-                    transaction.Rollback();
-                    transactionSuccess = false;
-                }
-            }
-
-            if (transactionSuccess) 
-            {
-                GameTransaction gameTransaction = new GameTransaction()
-                {
-                    bet = Bet,
-                    datematch = DateTime.UtcNow,
-                    matchid = matchId,
-                    payeeplayerid = Winner,
-                    senderplayerid = senderPlayerId
-                };
-
-                db.gametransactions.Add(gameTransaction);
-                db.SaveChanges();
-            }
-
-            db.Dispose();
+            }    
         }
     }
 }

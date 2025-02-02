@@ -9,7 +9,7 @@ namespace GameService.Models.Db.TransactionData
         {
             _db = db;
         }
-        public int SetTransaction(int bet, int payeeid, int senderid)
+        public int SetTransaction(decimal bet, int payeeid, int senderid, int? matchid = null)
         {
             User? payeePlayer = _db.users.FirstOrDefault(x=>x.id == payeeid);
             User? senderPlayer = _db.users.FirstOrDefault(x=>x.id==senderid);
@@ -41,7 +41,7 @@ namespace GameService.Models.Db.TransactionData
                 {
                     //отменяем
                     transaction.Rollback();
-                    return 1;
+                    return -2;
                 }
             }
 
@@ -49,7 +49,7 @@ namespace GameService.Models.Db.TransactionData
             {
                 bet = bet,
                 datematch = DateTime.UtcNow,
-                matchid = null,
+                matchid = matchid,
                 payeeplayerid = payeeid,
                 senderplayerid = senderid
             };

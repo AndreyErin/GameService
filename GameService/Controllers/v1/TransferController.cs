@@ -24,6 +24,8 @@ namespace GameService.Controllers.v1
                     return Ok();;
                 case 0:
                     return BadRequest("Ошибка. Недостаточно средств.");
+                case -2:
+                    return BadRequest("Ошибка. Сбой при проведении транзакции.");
                 default:
                     return BadRequest("Ошибка. Неверные id.");
             }

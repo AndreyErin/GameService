@@ -3,20 +3,24 @@
     //Сервис матчей
     public class InstancesService
     {
+        private readonly IServiceScopeFactory _scopeFactory;
+
         private List<Instance> _instancesList;
-        public InstancesService()
+        public InstancesService(IServiceScopeFactory scopeFactory)
         {
+            _scopeFactory = scopeFactory;
+
             //комнаты по умолчанию при запуске
             _instancesList = new List<Instance>()
             {
-                new(150),
-                new(250)
+                new(150, _scopeFactory),
+                new(250, _scopeFactory)
             };       
         }
 
         public int Add(int bet) 
         {
-            Instance inst = new(bet);
+            Instance inst = new(bet, _scopeFactory);
             _instancesList.Add(inst);
 
             return inst.Id;
@@ -40,5 +44,6 @@
         {
             return _instancesList.Where(x => x.IsVisible == true).ToList();
         }
+
     }
 }
