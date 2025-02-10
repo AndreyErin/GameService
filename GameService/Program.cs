@@ -4,6 +4,7 @@ using GameService.Models.Db.TransactionData;
 using GameService.Models.Db.UserData;
 using GameService.Models.Inst;
 using GameService.Models.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace GameService
 {
@@ -14,9 +15,9 @@ namespace GameService
             var builder = WebApplication.CreateBuilder(args);
             builder.Services.AddControllers();
 
-
             //ад
-            builder.Services.AddDbContext<AppDbContext>();
+            string ConnectionString = builder.Configuration.GetConnectionString("Default");
+            builder.Services.AddDbContext<AppDbContext>(opt=> opt.UseNpgsql(ConnectionString));
 
             builder.Services.AddSingleton<InstancesService>();
 

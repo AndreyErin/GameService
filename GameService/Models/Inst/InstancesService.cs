@@ -1,48 +1,61 @@
-﻿namespace GameService.Models.Inst
+﻿using System.Collections.Concurrent;
+
+namespace GameService.Models.Inst
 {
     //Сервис матчей
     public class InstancesService
     {
         private readonly IServiceScopeFactory _scopeFactory;
 
-        private List<Instance> _instancesList;
+        private ConcurrentDictionary<int , Instance> _instancesDictionary;
+
         public InstancesService(IServiceScopeFactory scopeFactory)
         {
-            _scopeFactory = scopeFactory;
+            _scopeFactory = scopeFactory;    
 
             //комнаты по умолчанию при запуске
-            _instancesList = new List<Instance>()
+            _instancesDictionary = new ConcurrentDictionary<int, Instance>() 
             {
-                new(150, _scopeFactory),
-                new(250, _scopeFactory)
-            };       
+                [1] = new Instance(150, _scopeFactory),
+                [2] = new Instance(250, _scopeFactory),
+            };
         }
 
         public int Add(int bet) 
         {
             Instance inst = new(bet, _scopeFactory);
-            _instancesList.Add(inst);
 
-            return inst.Id;
+            bool result =  _instancesDictionary.TryAdd(inst.Id, inst);
+            if (result) 
+            {
+                return inst.Id;
+            }
+
+            return 0;
         }
 
         public Instance? Get(int id) 
         {
-            return _instancesList.FirstOrDefault(x=>x.Id == id);
+            bool result = _instancesDictionary.TryGetValue(id, out Instance? inst);
+            if (result) 
+            {
+                return inst;
+            }
+            return null;
         }
 
         public void Delete(int id)
         {
-            Instance? inst = _instancesList.FirstOrDefault(x => x.Id == id);
-            if (inst != null)
+            bool result = _instancesDictionary.TryGetValue(id, out Instance? inst);
+            if (inst != null) 
             {
-                _instancesList.Remove(inst);
+                _instancesDictionary.TryRemove(inst.Id, out _);
             }
         }
 
         public List<Instance> GetFreeInsts() 
         {
-            return _instancesList.Where(x => x.IsVisible == true).ToList();
+            return _instancesDictionary.Values.Where(x => x.IsVisible == true).ToList();
         }
 
     }
